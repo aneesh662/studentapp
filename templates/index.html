@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Student Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 850px;
+            margin: 35px auto;
+            padding: 15px;
+            background: #f4f7fb;
+            color: #243047;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px #0000000d;
+        }
+        input {
+            box-sizing: border-box;
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccd3df;
+            border-radius: 6px;
+        }
+        button {
+            padding: 10px 15px;
+            border: 0;
+            border-radius: 6px;
+            background: #245db5;
+            color: white;
+            cursor: pointer;
+        }
+        .delete { background: #c0392b; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td {
+            text-align: left;
+            padding: 10px 5px;
+            border-bottom: 1px solid #e3e7ed;
+        }
+        .table-wrap { overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Student Record Manager</h1>
+    <p>Learn Flask and PostgreSQL by managing student records.</p>
+
+    <section class="card">
+        <h2>Add a Student</h2>
+        <form action="/add" method="POST">
+            <input name="name" placeholder="Student name"
+                   maxlength="100" required>
+            <input name="phone" placeholder="Phone number"
+                   maxlength="20" required>
+            <input name="course" placeholder="Course name"
+                   maxlength="100" required>
+            <button type="submit">Save Student</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>Student List ({{ students|length }})</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Name</th><th>Phone</th>
+                        <th>Course</th><th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.id }}</td>
+                        <td>{{ student.name }}</td>
+                        <td>{{ student.phone }}</td>
+                        <td>{{ student.course }}</td>
+                        <td>
+                            <form action="/delete/{{ student.id }}"
+                                  method="POST"
+                                  onsubmit="return confirm('Delete this student?')">
+                                <button class="delete" type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5">No students added yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</body>
+</html>
