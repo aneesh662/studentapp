@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: flask-student-app
+    name: flask-student-management
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app

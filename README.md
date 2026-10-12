@@ -1,28 +1,23 @@
-# Flask Student Management — Edit, Delete, Photo and PDF
+# Flask Student Management — Stable Package
 
-## Features
-- Search students by name, phone, place, course, or email.
-- Add and edit records.
-- Delete records after a confirmation prompt.
-- Upload student photo (JPG/JPEG/PNG/WEBP).
-- Upload and view one PDF document per student.
-- Export all or filtered results to Excel.
-- Print the student table.
-- PostgreSQL via `DATABASE_URL`; local SQLite fallback for development.
+## Included
+- Search, add, edit, delete student records
+- Student photo upload (JPG/JPEG/PNG/WEBP)
+- PDF upload and browser viewing
+- Excel export and print layout
+- PostgreSQL support through `DATABASE_URL`
+- Startup compatibility migration for three optional upload columns
 
-## Run locally
-`pip install -r requirements.txt`, then `python app.py`. Open http://127.0.0.1:5000.
+## Deploy on Render
+Build command: `pip install -r requirements.txt`
+Start command: `gunicorn app:app`
+Set `DATABASE_URL` to the PostgreSQL Internal Database URL and set a strong `SECRET_KEY`.
 
-## Render
-Build: `pip install -r requirements.txt`
-Start: `gunicorn app:app`
-Set `DATABASE_URL` to your Render PostgreSQL Internal Database URL and set a strong `SECRET_KEY`.
+## Database compatibility
+At startup, the app creates missing tables and adds only the missing upload metadata columns to the `student` table. It does not delete rows. Back up your database before deploying. If your existing table has a different name or a different schema, this automatic compatibility step may not fit your database; check Render logs before making schema changes.
 
-## IMPORTANT: existing database
-The new version adds photo and PDF columns. `db.create_all()` will NOT add columns to an already-existing table. Back up your database and apply a proper migration before upgrading an existing installation. Do not delete the old database.
-
-## IMPORTANT: uploaded-file persistence
-Uploaded files are stored on the app filesystem by default. Render web service filesystems are ephemeral unless a persistent disk is configured. To retain photos/PDFs across redeploys, attach a persistent disk and set `UPLOAD_FOLDER` to its mount path (for example `/var/data/uploads`) if your Render plan supports it, or use object storage.
+## File persistence
+Render web-service filesystems are ephemeral unless a persistent disk is configured. Set `UPLOAD_FOLDER` to a persistent disk mount (if available on your plan) or use external object storage to preserve uploaded photos/PDFs across redeploys.
 
 ## Security
-This starter has no login or access controls. Add authentication and authorization before exposing personal student records. Upload limit is 8 MB per request. Production apps should also validate actual file contents and scan uploads.
+This starter does not include authentication. Add login and role permissions before exposing student records publicly. Uploads are limited to 8 MB per request; production should also validate file contents and scan uploads.
