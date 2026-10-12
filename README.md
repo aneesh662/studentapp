@@ -1,48 +1,43 @@
-# Flask Student Record Manager
+# Flask Student Management App
 
-A beginner-friendly Flask + PostgreSQL application with add, list, and delete features.
+Features:
+- Search students by name, phone, place, course, or email.
+- Add and edit student records.
+- Export all records or search-filtered records to Excel (.xlsx).
+- Print the visible student table.
+- PostgreSQL support through `DATABASE_URL`.
+- `/health` endpoint for a basic database connectivity check.
 
 ## Files
-- `app.py`: Flask routes and PostgreSQL operations
-- `templates/index.html`: web interface
-- `requirements.txt`: Python dependencies
-- `.gitignore`: excludes secrets and temporary files
+- `app.py`: Flask routes, SQLAlchemy model, Excel export.
+- `templates/index.html`: Student list, search, add form, export and print.
+- `templates/edit.html`: Edit student details.
+- `static/style.css`: Responsive styling and print stylesheet.
+- `requirements.txt`: Python dependencies.
+- `render.yaml`: Optional Render Blueprint configuration.
 
-## Configure the database safely
+## Run locally
+1. Create a virtual environment.
+2. Install packages: `pip install -r requirements.txt`
+3. Set `SECRET_KEY` and optionally `DATABASE_URL`.
+4. Run: `python app.py`
+5. Open `http://127.0.0.1:5000`.
 
-The app reads the database connection URL from the environment variable `DATABASE_URL`. Do not hardcode database credentials in `app.py` or commit them to GitHub.
+If `DATABASE_URL` is not set locally, the app uses `students_local.db` for development only.
 
-### On Render
-1. Open your PostgreSQL database in Render and confirm its connection URL.
-2. Open your Flask Web Service.
-3. Go to **Environment** and add a variable:
-   - Key: `DATABASE_URL`
-   - Value: paste your PostgreSQL connection URL
-4. Save changes and redeploy if required.
+## Deploy to Render
+1. Push this project to a GitHub repository.
+2. In Render, create a PostgreSQL database and a Web Service in the same region.
+3. Set `DATABASE_URL` on the Web Service to the database's Internal Database URL.
+4. Set a strong `SECRET_KEY` environment variable.
+5. Build command: `pip install -r requirements.txt`
+6. Start command: `gunicorn app:app`
+7. Deploy and check `/health`.
 
-Because the database URL was shared in a chat, rotate/change its database password in Render before using it, then update the `DATABASE_URL` value with the new connection URL. Treat the URL as a password.
+Alternatively, use `render.yaml` as a Render Blueprint. If a database with the same name already exists, link the existing database rather than creating a duplicate.
 
-## Deploy on Render
-1. Create a PostgreSQL database on Render.
-2. Create a Render Web Service connected to this GitHub repository.
-3. Build command: `pip install -r requirements.txt`
-4. Start command: `gunicorn app:app`
-5. Add `DATABASE_URL` in the web service's Environment settings. Use the Internal Database URL when both services are in the same Render region.
-6. Deploy the web service.
-
-The app creates the `students` table on startup if it does not exist.
-
-## Local development
-1. Install Python 3.10+ and PostgreSQL.
-2. Create and activate a virtual environment.
-3. Install dependencies: `pip install -r requirements.txt`
-4. Set `DATABASE_URL` to your PostgreSQL connection URL in your local environment.
-5. Run: `python app.py`
-
-Never commit database credentials or `.env` files to GitHub.
-
-## Routes
-- `/`: list students and show the form
-- `/add`: add a student (POST)
-- `/delete/<id>`: delete a student (POST)
-- `/health`: check application/database connectivity
+## Important database notes
+- The app calls `db.create_all()` at startup. It creates missing tables and does not intentionally delete existing records.
+- For future schema changes in a production app, use migrations (for example Flask-Migrate/Alembic); `create_all()` does not update existing tables.
+- Keep database URLs and secrets out of GitHub. Set them in Render Environment.
+- This starter app has no login/role-based access control. Add authentication and authorization before exposing student personal information publicly.

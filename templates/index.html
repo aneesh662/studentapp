@@ -1,100 +1,88 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Student Manager</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 850px;
-            margin: 35px auto;
-            padding: 15px;
-            background: #f4f7fb;
-            color: #243047;
-        }
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px #0000000d;
-        }
-        input {
-            box-sizing: border-box;
-            display: block;
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ccd3df;
-            border-radius: 6px;
-        }
-        button {
-            padding: 10px 15px;
-            border: 0;
-            border-radius: 6px;
-            background: #245db5;
-            color: white;
-            cursor: pointer;
-        }
-        .delete { background: #c0392b; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td {
-            text-align: left;
-            padding: 10px 5px;
-            border-bottom: 1px solid #e3e7ed;
-        }
-        .table-wrap { overflow-x: auto; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Management</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Student Record Manager</h1>
-    <p>Learn Flask and PostgreSQL by managing student records.</p>
+  <main class="container">
+    <header class="page-header no-print">
+      <div>
+        <p class="eyebrow">STUDENT ADMINISTRATION</p>
+        <h1>Student Management</h1>
+        <p class="muted">Search, update, export, and print student records.</p>
+      </div>
+      <div class="header-actions">
+        <a class="button secondary" href="{{ url_for('export_students', q=search) }}">Export to Excel</a>
+        <button class="button secondary" type="button" onclick="window.print()">Print</button>
+      </div>
+    </header>
 
-    <section class="card">
-        <h2>Add a Student</h2>
-        <form action="/add" method="POST">
-            <input name="name" placeholder="Student name"
-                   maxlength="100" required>
-            <input name="phone" placeholder="Phone number"
-                   maxlength="20" required>
-            <input name="course" placeholder="Course name"
-                   maxlength="100" required>
-            <button type="submit">Save Student</button>
-        </form>
-    </section>
-
-    <section class="card">
-        <h2>Student List ({{ students|length }})</h2>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th><th>Name</th><th>Phone</th>
-                        <th>Course</th><th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for student in students %}
-                    <tr>
-                        <td>{{ student.id }}</td>
-                        <td>{{ student.name }}</td>
-                        <td>{{ student.phone }}</td>
-                        <td>{{ student.course }}</td>
-                        <td>
-                            <form action="/delete/{{ student.id }}"
-                                  method="POST"
-                                  onsubmit="return confirm('Delete this student?')">
-                                <button class="delete" type="submit">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr><td colspan="5">No students added yet.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="messages no-print">
+          {% for category, message in messages %}
+            <div class="message {{ category }}">{{ message }}</div>
+          {% endfor %}
         </div>
+      {% endif %}
+    {% endwith %}
+
+    <section class="panel no-print">
+      <form class="search-form" method="get" action="{{ url_for('index') }}">
+        <label class="sr-only" for="q">Search students</label>
+        <input id="q" name="q" type="search" value="{{ search }}" placeholder="Search name, phone, place, course, email…">
+        <button class="button primary" type="submit">Search</button>
+        {% if search %}<a class="button secondary" href="{{ url_for('index') }}">Clear</a>{% endif %}
+      </form>
+      <p class="muted small">Showing {{ students|length }} matching record(s) · {{ total }} total student(s)</p>
     </section>
+
+    <section class="panel no-print">
+      <h2>Add a student</h2>
+      <form method="post" action="{{ url_for('add_student') }}" class="form-grid">
+        <label>Full name *<input name="name" required maxlength="120"></label>
+        <label>Phone<input name="phone" maxlength="40"></label>
+        <label>Place<input name="place" maxlength="120"></label>
+        <label>Course<input name="course" maxlength="120"></label>
+        <label>Email<input name="email" type="email" maxlength="160"></label>
+        <label>Joined date<input name="joined_date" type="date"></label>
+        <div class="form-actions"><button class="button primary" type="submit">Add student</button></div>
+      </form>
+    </section>
+
+    <section class="panel table-panel">
+      <div class="table-heading">
+        <h2>Student records</h2>
+        <span class="muted small">Excel export follows the current search filter.</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Name</th><th>Phone</th><th>Place</th><th>Course</th><th>Email</th><th>Joined date</th><th class="no-print">Actions</th></tr>
+          </thead>
+          <tbody>
+          {% for student in students %}
+            <tr>
+              <td>{{ student.id }}</td>
+              <td class="name-cell">{{ student.name }}</td>
+              <td>{{ student.phone or "—" }}</td>
+              <td>{{ student.place or "—" }}</td>
+              <td>{{ student.course or "—" }}</td>
+              <td>{{ student.email or "—" }}</td>
+              <td>{{ student.joined_date.strftime("%d %b %Y") if student.joined_date else "—" }}</td>
+              <td class="no-print"><a class="button small-button" href="{{ url_for('edit_student', student_id=student.id) }}">Edit</a></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="8" class="empty">No students found. Try a different search or add a student.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <footer class="footer muted small">Student Management · Flask + PostgreSQL</footer>
+  </main>
 </body>
 </html>
