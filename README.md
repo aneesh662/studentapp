@@ -1,43 +1,28 @@
-# Flask Student Management App
+# Flask Student Management — Edit, Delete, Photo and PDF
 
-Features:
+## Features
 - Search students by name, phone, place, course, or email.
-- Add and edit student records.
-- Export all records or search-filtered records to Excel (.xlsx).
-- Print the visible student table.
-- PostgreSQL support through `DATABASE_URL`.
-- `/health` endpoint for a basic database connectivity check.
-
-## Files
-- `app.py`: Flask routes, SQLAlchemy model, Excel export.
-- `templates/index.html`: Student list, search, add form, export and print.
-- `templates/edit.html`: Edit student details.
-- `static/style.css`: Responsive styling and print stylesheet.
-- `requirements.txt`: Python dependencies.
-- `render.yaml`: Optional Render Blueprint configuration.
+- Add and edit records.
+- Delete records after a confirmation prompt.
+- Upload student photo (JPG/JPEG/PNG/WEBP).
+- Upload and view one PDF document per student.
+- Export all or filtered results to Excel.
+- Print the student table.
+- PostgreSQL via `DATABASE_URL`; local SQLite fallback for development.
 
 ## Run locally
-1. Create a virtual environment.
-2. Install packages: `pip install -r requirements.txt`
-3. Set `SECRET_KEY` and optionally `DATABASE_URL`.
-4. Run: `python app.py`
-5. Open `http://127.0.0.1:5000`.
+`pip install -r requirements.txt`, then `python app.py`. Open http://127.0.0.1:5000.
 
-If `DATABASE_URL` is not set locally, the app uses `students_local.db` for development only.
+## Render
+Build: `pip install -r requirements.txt`
+Start: `gunicorn app:app`
+Set `DATABASE_URL` to your Render PostgreSQL Internal Database URL and set a strong `SECRET_KEY`.
 
-## Deploy to Render
-1. Push this project to a GitHub repository.
-2. In Render, create a PostgreSQL database and a Web Service in the same region.
-3. Set `DATABASE_URL` on the Web Service to the database's Internal Database URL.
-4. Set a strong `SECRET_KEY` environment variable.
-5. Build command: `pip install -r requirements.txt`
-6. Start command: `gunicorn app:app`
-7. Deploy and check `/health`.
+## IMPORTANT: existing database
+The new version adds photo and PDF columns. `db.create_all()` will NOT add columns to an already-existing table. Back up your database and apply a proper migration before upgrading an existing installation. Do not delete the old database.
 
-Alternatively, use `render.yaml` as a Render Blueprint. If a database with the same name already exists, link the existing database rather than creating a duplicate.
+## IMPORTANT: uploaded-file persistence
+Uploaded files are stored on the app filesystem by default. Render web service filesystems are ephemeral unless a persistent disk is configured. To retain photos/PDFs across redeploys, attach a persistent disk and set `UPLOAD_FOLDER` to its mount path (for example `/var/data/uploads`) if your Render plan supports it, or use object storage.
 
-## Important database notes
-- The app calls `db.create_all()` at startup. It creates missing tables and does not intentionally delete existing records.
-- For future schema changes in a production app, use migrations (for example Flask-Migrate/Alembic); `create_all()` does not update existing tables.
-- Keep database URLs and secrets out of GitHub. Set them in Render Environment.
-- This starter app has no login/role-based access control. Add authentication and authorization before exposing student personal information publicly.
+## Security
+This starter has no login or access controls. Add authentication and authorization before exposing personal student records. Upload limit is 8 MB per request. Production apps should also validate actual file contents and scan uploads.

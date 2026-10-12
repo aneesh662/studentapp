@@ -1,88 +1,17 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Student Management</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-  <main class="container">
-    <header class="page-header no-print">
-      <div>
-        <p class="eyebrow">STUDENT ADMINISTRATION</p>
-        <h1>Student Management</h1>
-        <p class="muted">Search, update, export, and print student records.</p>
-      </div>
-      <div class="header-actions">
-        <a class="button secondary" href="{{ url_for('export_students', q=search) }}">Export to Excel</a>
-        <button class="button secondary" type="button" onclick="window.print()">Print</button>
-      </div>
-    </header>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="messages no-print">
-          {% for category, message in messages %}
-            <div class="message {{ category }}">{{ message }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
-
-    <section class="panel no-print">
-      <form class="search-form" method="get" action="{{ url_for('index') }}">
-        <label class="sr-only" for="q">Search students</label>
-        <input id="q" name="q" type="search" value="{{ search }}" placeholder="Search name, phone, place, course, email…">
-        <button class="button primary" type="submit">Search</button>
-        {% if search %}<a class="button secondary" href="{{ url_for('index') }}">Clear</a>{% endif %}
-      </form>
-      <p class="muted small">Showing {{ students|length }} matching record(s) · {{ total }} total student(s)</p>
-    </section>
-
-    <section class="panel no-print">
-      <h2>Add a student</h2>
-      <form method="post" action="{{ url_for('add_student') }}" class="form-grid">
-        <label>Full name *<input name="name" required maxlength="120"></label>
-        <label>Phone<input name="phone" maxlength="40"></label>
-        <label>Place<input name="place" maxlength="120"></label>
-        <label>Course<input name="course" maxlength="120"></label>
-        <label>Email<input name="email" type="email" maxlength="160"></label>
-        <label>Joined date<input name="joined_date" type="date"></label>
-        <div class="form-actions"><button class="button primary" type="submit">Add student</button></div>
-      </form>
-    </section>
-
-    <section class="panel table-panel">
-      <div class="table-heading">
-        <h2>Student records</h2>
-        <span class="muted small">Excel export follows the current search filter.</span>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>ID</th><th>Name</th><th>Phone</th><th>Place</th><th>Course</th><th>Email</th><th>Joined date</th><th class="no-print">Actions</th></tr>
-          </thead>
-          <tbody>
-          {% for student in students %}
-            <tr>
-              <td>{{ student.id }}</td>
-              <td class="name-cell">{{ student.name }}</td>
-              <td>{{ student.phone or "—" }}</td>
-              <td>{{ student.place or "—" }}</td>
-              <td>{{ student.course or "—" }}</td>
-              <td>{{ student.email or "—" }}</td>
-              <td>{{ student.joined_date.strftime("%d %b %Y") if student.joined_date else "—" }}</td>
-              <td class="no-print"><a class="button small-button" href="{{ url_for('edit_student', student_id=student.id) }}">Edit</a></td>
-            </tr>
-          {% else %}
-            <tr><td colspan="8" class="empty">No students found. Try a different search or add a student.</td></tr>
-          {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </section>
-    <footer class="footer muted small">Student Management · Flask + PostgreSQL</footer>
-  </main>
-</body>
-</html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Management</title><link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head>
+<body><main class="container">
+<header class="page-header no-print"><div><p class="eyebrow">STUDENT ADMINISTRATION</p><h1>Student Management</h1><p class="muted">Search, edit, delete, upload, export and print records.</p></div>
+<div class="header-actions"><a class="button secondary" href="{{ url_for('export_students', q=search) }}">Export to Excel</a><button class="button secondary" onclick="window.print()" type="button">Print</button></div></header>
+{% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="messages no-print">{% for category,message in messages %}<div class="message {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+<section class="panel no-print"><form class="search-form" method="get" action="{{ url_for('index') }}"><label class="sr-only" for="q">Search</label><input id="q" name="q" type="search" value="{{ search }}" placeholder="Search name, phone, place, course, email…"><button class="button primary">Search</button>{% if search %}<a class="button secondary" href="{{ url_for('index') }}">Clear</a>{% endif %}</form><p class="muted small">Showing {{ students|length }} matching · {{ total }} total. Excel export follows the current search.</p></section>
+<section class="panel no-print"><h2>Add a student</h2><form method="post" action="{{ url_for('add_student') }}" enctype="multipart/form-data" class="form-grid">
+<label>Full name *<input name="name" required maxlength="120"></label><label>Phone<input name="phone" maxlength="40"></label><label>Place<input name="place" maxlength="120"></label><label>Course<input name="course" maxlength="120"></label><label>Email<input name="email" type="email" maxlength="160"></label><label>Joined date<input name="joined_date" type="date"></label>
+<label>Student photo (JPG/PNG/WEBP)<input name="photo" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"></label><label>PDF document (max 8 MB)<input name="document" type="file" accept=".pdf,application/pdf"></label><div class="form-actions"><button class="button primary">Add student</button></div></form><p class="muted small upload-note">Photo must be JPG, PNG or WEBP. Document must be PDF. Each upload is limited to 8 MB.</p></section>
+<section class="panel"><div class="table-heading"><h2>Student records</h2><span class="muted small">Edit to update; Delete to remove.</span></div><div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>Photo</th><th>Name</th><th>Phone</th><th>Place</th><th>Course</th><th>Email</th><th>Joined</th><th>PDF</th><th class="no-print">Actions</th></tr></thead><tbody>
+{% for s in students %}<tr><td>{{ s.id }}</td><td>{% if s.photo_filename %}<img class="student-photo" src="{{ url_for('student_photo', student_id=s.id) }}" alt="Photo of {{ s.name }}">{% else %}<span class="photo-placeholder">No photo</span>{% endif %}</td><td class="name-cell">{{ s.name }}</td><td>{{ s.phone or "—" }}</td><td>{{ s.place or "—" }}</td><td>{{ s.course or "—" }}</td><td>{{ s.email or "—" }}</td><td>{{ s.joined_date.strftime("%d %b %Y") if s.joined_date else "—" }}</td><td>{% if s.document_filename %}<a href="{{ url_for('view_document', student_id=s.id) }}" target="_blank" rel="noopener">View PDF</a>{% else %}<span class="muted">None</span>{% endif %}</td>
+<td class="actions no-print"><a class="button small-button" href="{{ url_for('edit_student', student_id=s.id) }}">Edit</a><form method="post" action="{{ url_for('delete_student', student_id=s.id) }}" onsubmit="return confirm('Delete this student and uploaded files? This cannot be undone.');"><input type="hidden" name="q" value="{{ search }}"><button class="button danger small-button" type="submit">Delete</button></form></td></tr>
+{% else %}<tr><td colspan="10" class="empty">No students found. Try another search or add a student.</td></tr>{% endfor %}
+</tbody></table></div></section><footer class="footer muted small">Student Management · Flask + PostgreSQL</footer></main></body></html>
