@@ -210,6 +210,12 @@ def add_student():
     return redirect(url_for("index"))
 
 
+@app.get("/students/<int:student_id>")
+def student_profile(student_id):
+    student = db.get_or_404(Student, student_id)
+    return render_template("profile.html", student=student)
+
+
 @app.route("/students/<int:student_id>/edit", methods=["GET", "POST"])
 def edit_student(student_id):
     student = db.get_or_404(Student, student_id)

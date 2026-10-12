@@ -21,3 +21,8 @@ Render web-service filesystems are ephemeral unless a persistent disk is configu
 
 ## Security
 This starter does not include authentication. Add login and role permissions before exposing student records publicly. Uploads are limited to 8 MB per request; production should also validate file contents and scan uploads.
+
+
+## Professional student profile
+
+Use **View** beside any student to open a dedicated profile page. The profile includes the student's photo, contact details, course, joining date, and uploaded PDF link. Select **Print profile** to print it or choose **Save as PDF** in the browser print dialog. The dashboard also has improved responsive styling, search, summary cards, and a clearer action layout.

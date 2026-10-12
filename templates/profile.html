@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Profile | {{ student.name }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<main class="container profile-container">
+  <div class="profile-toolbar no-print">
+    <a class="back-link" href="{{ url_for('index') }}">← Back to student records</a>
+    <div class="header-actions"><a class="button secondary" href="{{ url_for('edit_student', student_id=student.id) }}">Edit profile</a><button class="button primary" onclick="window.print()" type="button">Print profile</button></div>
+  </div>
+  <article class="profile-sheet">
+    <div class="profile-document-header">
+      <div><p class="eyebrow">STUDENT ADMINISTRATION</p><h1>Student Profile</h1><p class="muted">Official student information record</p></div>
+      <div class="record-reference"><span>STUDENT ID</span><strong>#{{ student.id }}</strong><span class="record-status">● Record on file</span></div>
+    </div>
+    <div class="profile-hero">
+      {% if student.photo_filename %}<img class="profile-photo" src="{{ url_for('student_photo', student_id=student.id) }}" alt="Photo of {{ student.name }}">{% else %}<div class="profile-photo profile-photo-placeholder">{{ student.name[:1]|upper }}</div>{% endif %}
+      <div class="profile-person"><p class="eyebrow">STUDENT NAME</p><h2>{{ student.name }}</h2><p class="profile-course">{{ student.course or "Course not specified" }}</p><p class="muted">{{ student.place or "Location not provided" }}</p></div>
+    </div>
+    <section class="profile-section"><h3><span>01</span> Personal and contact details</h3>
+      <div class="detail-grid">
+        <div class="detail-item"><span>Full name</span><strong>{{ student.name }}</strong></div>
+        <div class="detail-item"><span>Phone number</span><strong>{{ student.phone or "Not provided" }}</strong></div>
+        <div class="detail-item"><span>Email address</span><strong class="breakable">{{ student.email or "Not provided" }}</strong></div>
+        <div class="detail-item"><span>Place / City</span><strong>{{ student.place or "Not provided" }}</strong></div>
+      </div>
+    </section>
+    <section class="profile-section"><h3><span>02</span> Academic information</h3>
+      <div class="detail-grid">
+        <div class="detail-item"><span>Course / Class</span><strong>{{ student.course or "Not specified" }}</strong></div>
+        <div class="detail-item"><span>Joining date</span><strong>{{ student.joined_date.strftime("%d %B %Y") if student.joined_date else "Not provided" }}</strong></div>
+      </div>
+    </section>
+    <section class="profile-section"><h3><span>03</span> Uploaded documents</h3>
+      <div class="document-row"><div class="document-icon">PDF</div><div class="document-info"><strong>{{ student.document_original_name if student.document_filename else "No document uploaded" }}</strong><span class="muted small">{% if student.document_filename %}Student document attached{% else %}Upload a PDF from the Edit profile page{% endif %}</span></div>
+      {% if student.document_filename %}<a class="button secondary no-print" href="{{ url_for('view_document', student_id=student.id) }}" target="_blank" rel="noopener">Open PDF ↗</a>{% endif %}</div>
+    </section>
+    <div class="profile-footer"><span>Student Management System</span><span>Student ID: #{{ student.id }}</span></div>
+  </article>
+  <p class="print-note muted small no-print">Tip: choose “Save as PDF” in the print dialog to save a digital copy of this profile.</p>
+</main>
+</body></html>
